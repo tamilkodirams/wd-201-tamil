@@ -24,22 +24,28 @@ def parse_dns(dns_raw)
       values[i][j]=rows[j].strip
     end
   end
- dns_records=[]
- values.each { |record| dns_records << {'type' => record[0], 'domain' => record[1], 'target' =>   record[2]} }
- return dns_records
-end
+ h= Hash[values.map { |key,value1,value2| [value1,{:type=>key,:target=>value2}]}]
+ end
 
 def resolve(dns_records, lookup_chain, domain)
-
+  record= dns_records[domain]
+  if (!record)
+    err= "Error: Record not found for #{domain}"
+    lookup_chain =[err]
+    return lookup_chain
+  elsif record[:type] == "CNAME"
+    lookup_chain<<record[:target]
+    resolve(dns_records,lookup_chain,record[:target])
+  elsif record[:type] == "A"
+    return lookup_chain<<record[:target]
+  end
 end
 
 # To complete the assignment, implement `parse_dns` and `resolve`.
 # Remember to implement them above this line since in Ruby
 # you can invoke a function only after it is defined.
 
-
 dns_records = parse_dns(dns_raw)
-puts dns_records
 lookup_chain = [domain]
 lookup_chain = resolve(dns_records, lookup_chain, domain)
-#puts lookup_chain.join(" => ")
+puts lookup_chain.join(" => ")
