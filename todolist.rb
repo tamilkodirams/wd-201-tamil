@@ -1,6 +1,6 @@
 require "date"
 
-
+#Todo class declaration
 class Todo
   attr_accessor :text, :due_date, :completed
  def initialize(text, due_date, completed)
@@ -8,38 +8,58 @@ class Todo
   @due_date=due_date
   @completed=completed
  end
- def to_displayable_string
-   "#{@text} #{@due_date}"
- end
-end
 
+  def to_displayable_string
+    display_status = completed ? "[x]" : "[ ]"
+    display_date = due_today? ? nil : due_date
+    #display_date = # FILL CODE HERE
+    "#{display_status} #{@text} #{display_date}"
+  end
+  def overdue?
+    due_date < Date.today
+    end
 
+    def due_today?
+    due_date == Date.today
+    end
+
+    def due_later?
+    due_date > Date.today
+    end
+  end
+#end of Todo class
+
+#TodoList class declaration
 class TodosList
   attr_accessor :todos
   def initialize(todos)
     @todos = todos
+    #puts @todos
   end
 
   def overdue
-    TodosList.new(@todos.filter { |todo| todo.due_date < Date.today })
+    TodosList.new(@todos.filter { |todo| todo.overdue? })
   end
 
   def due_today
-    TodosList.new(@todos.filter { |todo| todo.due_date==Date.today })
+    TodosList.new(@todos.filter { |todo| todo.due_today?})
   end
 
   def due_later
-    TodosList.new(@todos.filter { |todo| todo.due_date > Date.today })
+    TodosList.new(@todos.filter { |todo| todo.due_later?})
+  end
 
+  def add(a)
+    @todos.push(a)
   end
 
   def to_displayable_list
     todo_text=[]
     todo_text=@todos.map {|todo| todo.to_displayable_string }
-    completed = @todos.map { |todo| todo.completed }
-    completed ? str = "[ ]" + todo_text.join("\n") : str = "[X]" + todo_text.join("\n")
+    #puts todo_text
+    #str="[ ]" + todo_text.join("\n")
   end
-
+#end of TodoList class
 end
 
 date = Date.today
@@ -56,7 +76,7 @@ todos = todos.map { |todo|
 
 todos_list = TodosList.new(todos)
 
-#todos_list.add(Todo.new("Service vehicle", date, false))
+todos_list.add(Todo.new("Service vehicle", date, false))
 
 puts "My Todo-list\n\n"
 
